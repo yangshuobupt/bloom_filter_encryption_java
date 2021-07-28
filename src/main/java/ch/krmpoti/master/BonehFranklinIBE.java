@@ -2,7 +2,6 @@ package ch.krmpoti.master;
 
 import iaik.security.ec.math.curve.AtePairingOverBarretoNaehrigCurveFactory;
 import iaik.security.ec.math.curve.PairingTypes;
-
 import java.math.BigInteger;
 import java.util.logging.Logger;
 

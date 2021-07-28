@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.Security;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,22 +26,24 @@ public class Main {
         IAIK.addAsProvider();
         Security.addProvider(new ECCelerate(true));
 
-        if ("basic".equalsIgnoreCase(args[0])) {
-            testBasicBloomEncryption(Integer.parseInt(args[1]), Integer.parseInt(args[2]));
-        } else if ("basic-start".equalsIgnoreCase(args[0])) {
-            writeBasicBFHeaders();
-            testBasicBloomEncryption(Integer.parseInt(args[1]), Integer.parseInt(args[2]));
-        } else if ("tb-start".equalsIgnoreCase(args[0])){
-            writeTimeBasedBFHeaders();
-            testTimeBasedBFE(Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(args[3]), args[4]);
-        } else if ("tb".equalsIgnoreCase(args[0])){
-            testTimeBasedBFE(Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(args[3]), args[4]);
-        } else if ("functions".equalsIgnoreCase(args[0])) {
-            writeFunctionsHeaders();
-            for (int i = 0; i < 500; i++) {
-                testFunctions();
-            }
-        }
+//        if ("basic".equalsIgnoreCase(args[0])) {
+//            testBasicBloomEncryption(Integer.parseInt(args[1]), Integer.parseInt(args[2]));
+//        } else if ("basic-start".equalsIgnoreCase(args[0])) {
+//            writeBasicBFHeaders();
+//            testBasicBloomEncryption(Integer.parseInt(args[1]), Integer.parseInt(args[2]));
+//        } else if ("tb-start".equalsIgnoreCase(args[0])){
+//            writeTimeBasedBFHeaders();
+//            testTimeBasedBFE(Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(args[3]), args[4]);
+//        } else if ("tb".equalsIgnoreCase(args[0])){
+//            testTimeBasedBFE(Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(args[3]), args[4]);
+//        } else if ("functions".equalsIgnoreCase(args[0])) {
+//            writeFunctionsHeaders();
+//            for (int i = 0; i < 500; i++) {
+//                testFunctions();
+//            }
+//        }
+        //testBasicBloomEncryption();
+        testTimeBasedBFE(8,12,1,"000000000001");
 
     }
 
@@ -57,10 +60,10 @@ public class Main {
             ciphertext = BloomFilterEncryption.encrypt(bloomFilterEncryptionSecretKey.getFirstElement());
 
             try {
-                System.out.println("KEY2: " + new String(BloomFilterEncryption.decrypt
+                System.out.println("KEY2: " + new String(Objects.requireNonNull(BloomFilterEncryption.decrypt
                         (bloomFilterEncryptionSecretKey.getFirstElement(),
-                        bloomFilterEncryptionSecretKey.getSecondElement(),
-                        ciphertext.getFirstElement())));
+                                bloomFilterEncryptionSecretKey.getSecondElement(),
+                                ciphertext.getFirstElement()))));
             } catch (KeyAlreadyPuncturedException e) {
                 e.printStackTrace();
             }
@@ -71,7 +74,7 @@ public class Main {
 
     }
 
-    public static void testBasicBloomEncryption(int filterElementNumber, int encryptionsNum) {
+    public static void ctestBasicBloomEncryption(int filterElementNumber, int encryptionsNum) {
         LOGGER.log(Level.INFO, "-------------------- TEST START ------------------------");
         StopWatch timerKeyGen = new StopWatch();
         StopWatch timerEnc = new StopWatch();
@@ -208,11 +211,9 @@ public class Main {
                     ciphertext);
             timerPunc.suspend();
         }
-
         timerEnc.stop();
         timerDec.stop();
         timerPunc.stop();
-
         Pair<Long, Long> puncturingTimes;
 
         for (int i = 1; i < intervalNum; i++) {

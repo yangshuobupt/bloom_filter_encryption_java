@@ -29,6 +29,7 @@ public class BloomFilter implements Filter {
                 hashCount + ").");
     }
 
+    //
     public BloomFilter(int n, double falsePositiveProbability) {
         if (n < 1) {
             throw new IllegalArgumentException("Provided bloom filter element number has to be a positive integer!");

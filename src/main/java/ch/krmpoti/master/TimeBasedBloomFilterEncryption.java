@@ -5,10 +5,7 @@ import org.apache.commons.lang3.time.StopWatch;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,11 +14,13 @@ public class TimeBasedBloomFilterEncryption {
     private static final Logger LOGGER = Logger.getLogger(TimeBasedBloomFilterEncryption.class.getName());
     private static final int IBE_SECURITY_PARAM = 382;
 
+
     public static Pair<Pair<Long, Long>, Pair<BFESystemParams, TimeBasedBFESecretKey>> generateKeys(int k, int
             filterElementNumber, double filterFalsePositiveProbability, int timeSlotsExponent) {
         LOGGER.log(Level.INFO, "Generating keys for the Time-Based Bloom Filter Encryption with 2^{0} time-slots and" +
                         " bloom filter with expected n = {1} and false positive probability of {2}.",
                 new Object[]{timeSlotsExponent, filterElementNumber, filterFalsePositiveProbability});
+        //LOGGER.setLevel(Level.OFF);
 
         Filter filter = new BloomFilter(filterElementNumber, filterFalsePositiveProbability);
         int bloomFilterTreeDepth = calculateTargetBloomFilterTreeDepth(filter.size());
@@ -42,7 +41,7 @@ public class TimeBasedBloomFilterEncryption {
                         ibeSystemParamsWithMasterKey.getSecondElement(), "0"));
         timeBasedSecretKey.put("1",
                 HierarchicalIBE.extract(ibeSystemParamsWithMasterKey.getFirstElement(),
-                ibeSystemParamsWithMasterKey.getSecondElement(), "1"));
+                        ibeSystemParamsWithMasterKey.getSecondElement(), "1"));
         ibeSystemParamsWithMasterKey.setSecondElement(null); // Destroy master key after the first two nodes are created
 
         String startNodeId = Utils.padStringWithZeros("", timeSlotsExponent);
@@ -69,7 +68,6 @@ public class TimeBasedBloomFilterEncryption {
         byte[] K = bfeSystemParams.getIBESystemParams()
                 .getHashDigest(Utils.generateRandomPositiveBigInteger(ibeSystemParams.getOrder()).toByteArray(),
                         IBE_SECURITY_PARAM / Byte.SIZE); // TODO take the keylength from params?
-
         List<Triple<byte[], ECPoint, ECPoint>> encapsulatedKeys = new ArrayList<>(bfeSystemParams.getFilterHashCount());
         int[] bloomPositions = BloomFilter.getBitPositions(new BigInteger(c), bfeSystemParams.getFilterHashCount(),
                 bfeSystemParams.getFilterSize());
@@ -97,8 +95,8 @@ public class TimeBasedBloomFilterEncryption {
 
     // note in docu this method runs in place
     public static Pair<Long, Long> punctureInterval(BFESystemParams bfeSystemParams,
-                                                                  TimeBasedBFESecretKey secretKey, String intervalId,
-                                                                                 boolean initial)
+                                                    TimeBasedBFESecretKey secretKey, String intervalId,
+                                                    boolean initial)
             throws ParentKeyNotAvailableException {
         LOGGER.log(Level.INFO, "Starting puncturing of the current time interval.");
 
@@ -144,7 +142,7 @@ public class TimeBasedBloomFilterEncryption {
 
     // note in docu this method runs in place
     public static Pair<Long, Long> punctureInterval(BFESystemParams bfeSystemParams,
-                                                                                TimeBasedBFESecretKey secretKey)
+                                                    TimeBasedBFESecretKey secretKey)
             throws ParentKeyNotAvailableException {
         String nextTimeIntervalId = Utils.incrementBinaryString(secretKey.getTimeIntervalId());
         return punctureInterval(bfeSystemParams, secretKey, nextTimeIntervalId, false);
@@ -198,6 +196,7 @@ public class TimeBasedBloomFilterEncryption {
 
         String leftNodeId = getLeftChildNodeId(nodeId);
         String rightNodeId = getRightChildNodeId(nodeId);
+        //System.out.println(leftNodeId + "  " + rightNodeId);
 
         Triple<ECPoint, ECPoint, List<ECPoint>> leftNodeKey = HierarchicalIBE.derive(systemParams, nodeKey, leftNodeId);
         Triple<ECPoint, ECPoint, List<ECPoint>> rightNodeKey = HierarchicalIBE.derive(systemParams, nodeKey, rightNodeId);
